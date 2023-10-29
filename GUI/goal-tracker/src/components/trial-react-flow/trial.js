@@ -11,11 +11,11 @@ import 'reactflow/dist/style.css';
 import { GoalNode } from '../goal-node/goal_node';
 
 const initialNodes = [
-    {id: '1', type: 'goalNode', position: { x: 450, y: 0 }, data: { title: "Life" , describe: "abcdef"}},
-    {id: '2', type: 'goalNode', position: { x: 0, y: 300 }, data: { title: "Goal-1" , describe: "abcdef"}},
-    {id: '3', type: 'goalNode', position: { x: 300, y: 300 }, data: { title: "Goal-2" , describe: "abcdef"}},
-    {id: '4', type: 'goalNode', position: { x: 600, y: 300}, data: { title: "Goal-3" , describe: "abcdef"}},
-    {id: '5', type: 'goalNode', position: { x: 900, y: 300 }, data: { title: "Goal-4" , describe: "abcdef"}},
+    {id: '1', type: 'goalNode', position: { x: 450, y: 0 }, data: { title: "Life" , describe: "abcdef", goalState: "not-started"}},
+    {id: '2', type: 'goalNode', position: { x: 0, y: 300 }, data: { title: "Goal-1" , describe: "abcdef", goalState: "completed" }},
+    {id: '3', type: 'goalNode', position: { x: 300, y: 300 }, data: { title: "Goal-2" , describe: "abcdef",goalState: "in-progress" }},
+    {id: '4', type: 'goalNode', position: { x: 600, y: 300}, data: { title: "Goal-3" , describe: "abcdef", goalState: "terminated"}},
+    {id: '5', type: 'goalNode', position: { x: 900, y: 300 }, data: { title: "Goal-4" , describe: "abcdef", goalState: "not-started"}},
     
 
 ];

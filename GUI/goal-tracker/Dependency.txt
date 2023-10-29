@@ -2,3 +2,20 @@
 2) Bootstarp --> npm install bootstrap --save
 3) React-Flow-Renderer --> npm install reactflow --save
 //4) Route --> npm install react-router-dom --save
+
+
+Colours: Selection
+In-progress:
+Green: #017352 (dark) (Not Good)
+#13A365
+DDF1E6
+#7ae6b7
+
+Yellow: #F1DBA9
+Red: #F78181
+#e9a4a4 (selected)
+
+#cf9292
+
+Gray: #677888
+#c3cbd3 (selected)

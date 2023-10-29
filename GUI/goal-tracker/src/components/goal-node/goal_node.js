@@ -4,18 +4,46 @@ import Card from 'react-bootstrap/Card';
 import './goal_node.css'
 import { Handle, Position } from 'reactflow';
 
+/**
+ * 
+ * @param {*} goalStatus : String (in-progress)
+ * @returns : String (In Progress)
+ */
+function getStateString(goalStatus){
+    var out = "";
+    var nextCharToUpper = true;
+    for (var i = 0; i < goalStatus.length; i++){
+        if (nextCharToUpper){
+            out += goalStatus[i].toUpperCase();
+            nextCharToUpper = false;
+        }else if(goalStatus[i] == "-"){
+            out += " ";
+            nextCharToUpper = true;
+        }
+        else{
+            out += goalStatus[i];
+        }
+        
+    }
+    return out;
+}
 
 function GoalNode(props) {
     const [goalTitle, setgoalTitle] = useState(props.data.title);
     const [description, setDescription] = useState(props.description);
     const [width, setWidth] = useState(props.width)
     const [level, setLevel] = useState(props.level)
+    const [goalState, setgoalState] = useState(props.data.goalState)
 
     useEffect(() => {
         if (width == undefined){
             console.log("Width Not provided, Setting to Default, 170")
             setWidth("230px")
         }
+        if (goalState == undefined){
+            setgoalState("not-started");
+        }
+
     }, [props, width]);
 
     // console.log("Node object: ",  props.data)
@@ -40,17 +68,17 @@ function GoalNode(props) {
     // }
 
     return (
-        <div style={{ width:{width}}}>
+        <div style={{ width:`${width}`}} className='testbg'>
             <Handle type="target" position={Position.Top} />
-            <Card style={{ width:`${width}`}}>
-                <Card.Body>
+            <Card  >
+                <Card.Body className={`bg-${goalState}`}>
                     <Card.Title>
                         <div className='row'>
                             <div className='col-6'>
                                 <h4 className='title'>{goalTitle}</h4>
                             </div>
                             <div className='col-6' align="right">
-                                <p className='status ellipsis'>In-Progress</p>
+                                <p className='status ellipsis'>{getStateString(goalState)}</p>
                             </div>
 
                         </div>
@@ -65,31 +93,31 @@ function GoalNode(props) {
 
                     <div className='row'>
                         <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
+                            <p className='ellipsis subtask'><span className="dot bg-in-progress-dot" ></span>Subtask-1 abcderfg</p>
                         </div>
                         <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
-                        </div>
-                    </div>
-                    <div className='row'>
-                        <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
-                        </div>
-                        <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
+                            <p className='ellipsis subtask'><span className="dot bg-not-started-dot"></span>Subtask-1 abcderfg</p>
                         </div>
                     </div>
                     <div className='row'>
                         <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
+                            <p className='ellipsis subtask'><span className="dot bg-completed-dot"></span>Subtask-1 abcderfg</p>
                         </div>
                         <div className='col-6'>
-                            <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
+                            <p className='ellipsis subtask'><span className="dot bg-terminated-dot"></span>Subtask-1 abcderfg</p>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='col-6'>
+                            <p className='ellipsis subtask'><span className="dot bg-completed-dot"></span>Subtask-1 abcderfg</p>
+                        </div>
+                        <div className='col-6'>
+                            <p className='ellipsis subtask'><span className="dot  bg-in-progress-dot"></span>Subtask-1 abcderfg</p>
                         </div>
                     </div>
                 </Card.Body>
                 <hr style={{ margin: "0px", padding: "0px" }} />
-                <Card.Footer className='goal-footer'>
+                <Card.Footer className='goal-footer testbg'>
                     <p className='ellipsis goal-footer' style={{ margin: "0px" }}>Completed-On: 31/10</p>
                 </Card.Footer>
             </Card>
