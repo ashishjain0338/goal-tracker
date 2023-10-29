@@ -1,0 +1,4 @@
+1) Axios  --> npm i axios --save
+2) Bootstarp --> npm install bootstrap --save
+3) React-Flow-Renderer --> npm install reactflow --save
+//4) Route --> npm install react-router-dom --save
