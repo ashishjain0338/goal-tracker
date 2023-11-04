@@ -36,3 +36,22 @@
     transform: rotate(360deg);
   }
 }
+
+.openRightPane{
+  z-index: 1;
+  display: inline;
+  float: right;
+  visibility: hidden;
+}
+
+.closeRightPane, .openRightPane{
+  margin: 5px 0px 5px 0px;
+}
+
+.closeRightPane:hover, .openRightPane:hover{
+  opacity: 0.75;
+}
+
+.rightPane{
+  background-color: rgb(241, 248, 255);
+}

@@ -71,7 +71,7 @@ function Trial() {
 
   // console.log(TestPositioningAlgo());
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <button onClick={onSave}>Save</button>
       <button onClick={TestPositioningAlgo}>Position</button>
       <ReactFlow
