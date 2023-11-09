@@ -34,7 +34,7 @@ const nodeTypes = { goalNode: GoalNode };
 
 
 
-function Trial() {
+function Trial(props) {
   const [rfInstance, setRfInstance] = useState(null);
   const onSave = useCallback(() => {
     if (rfInstance) {
@@ -50,7 +50,7 @@ function Trial() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(BigEdges);
   // const { setViewport } = useReactFlow();
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
-
+  const onClick = useCallback((event, node) => {console.log("element Clicked Params |", node); props.clickedNodeCallback(node)})
   function TestPositioningAlgo() {
     var data = JSON.parse(localStorage.getItem("demo-flow"));
     var dimensions = {
@@ -82,6 +82,7 @@ function Trial() {
         onConnect={onConnect}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
+        onNodeClick={onClick}
       >
         <Controls />
         <MiniMap zoomable pannable/>

@@ -44,6 +44,10 @@
   visibility: hidden;
 }
 
+.closeRightPane{
+  visibility: visible;
+}
+
 .closeRightPane, .openRightPane{
   margin: 5px 0px 5px 0px;
 }

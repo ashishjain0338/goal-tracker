@@ -1,45 +1,43 @@
 import './App.css';
 import { NavBar } from './components/nav-bar/nav_bar'
 import { Trial } from './components/trial-react-flow/trial';
-import { GoalNode } from './components/goal-node/goal_node';
 import SplitPane from "react-split-pane";
-import React, { useCallback, useState } from 'react';
-
+import React, { useState } from 'react';
+import { GoalNodeView } from './components/goal-node-view/goal-node-view';
 
 function App() {
-  const [paneLeftWidth, setPaneLeftWidth] = useState("70%");
+  const [clickedNode, setClickedNode] = useState("")
 
-function changeRightPaneWidth(){
-  console.log("Button Called ", paneLeftWidth)
-  if (paneLeftWidth == "100%"){
-    setPaneLeftWidth("70%");
-    document.getElementsByClassName('closeRightPane')[0].style.visibility = "visible";
-    document.getElementsByClassName('openRightPane')[0].style.visibility = "hidden";
-  }else{
-    setPaneLeftWidth("100%");
-    document.getElementsByClassName('closeRightPane')[0].style.visibility = "hidden";
-    document.getElementsByClassName('openRightPane')[0].style.visibility = "visible";
+  function changeRightPaneWidth() {
+    var closeBtnVisibility = document.getElementsByClassName('closeRightPane')[0].style.visibility
+    if (closeBtnVisibility == "visible" || closeBtnVisibility == "") {
+      // Closing the Right Pane  
+      document.getElementsByClassName("Pane vertical Pane1")[0].style.width = "100%"; //Left-Pane
+      document.getElementsByClassName('closeRightPane')[0].style.visibility = "hidden";
+      document.getElementsByClassName('openRightPane')[0].style.visibility = "visible";
+    } else {
+      document.getElementsByClassName("Pane vertical Pane1")[0].style.width = "70%"; //Left-Pane
+      document.getElementsByClassName('closeRightPane')[0].style.visibility = "visible";
+      document.getElementsByClassName('openRightPane')[0].style.visibility = "hidden";
+    }
   }
-  
-  console.log(document.getElementsByClassName('closeRightPane')[0].style)
-}
 
   return (
     <div>
       {/* <NavBar/> */}
-      <SplitPane
+      <SplitPane className='split-pane'
         split="vertical"
         minSize={100}
         maxSize={-100}
-        defaultSize={paneLeftWidth}
+        defaultSize={"70%"}
       >
         <div style={{ height: "100vh" }} >
-        <button className='openRightPane' onClick={changeRightPaneWidth}>&lt;</button>
-          <Trial />
-         
+          <button className='openRightPane' onClick={changeRightPaneWidth}>&lt;</button>
+          <Trial clickedNodeCallback={setClickedNode} />
         </div>
-        <div style={{ height: "100vh"}} className='rightPane'>
+        <div style={{ height: "100vh" }} className='rightPane'>
           <button className='closeRightPane' onClick={changeRightPaneWidth}>&gt;</button>
+          <GoalNodeView node={clickedNode} />
         </div>
       </SplitPane>
       {/* <Routes>
