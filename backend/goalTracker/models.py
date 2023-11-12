@@ -1,5 +1,6 @@
 from django.db import models
 import datetime
+import simplejson as json
 
 # Create your models here.
 class GoalNode(models.Model):
@@ -8,7 +9,7 @@ class GoalNode(models.Model):
     Motivation = models.CharField(max_length=5000, default="Your Goal Motivation")
     Subtask = models.CharField(max_length=1000, default="[]")
     State = models.CharField(default="not-started", max_length=30)# 
-
+    # Possible Option for state : terminated, not-started, in-progress, completed 
     GoalId = models.IntegerField()
     X = models.IntegerField(default= 100)
     Y = models.IntegerField(default= 100)
@@ -35,5 +36,5 @@ class GoalNode(models.Model):
 
 class GraphFlow(models.Model):
     UserId = models.IntegerField()
-    AdjList = models.CharField(max_length=5000, default= "[]")
+    AdjList = models.CharField(max_length=5000, default= json.dumps([]))
     NodeCount = models.IntegerField(default=0)

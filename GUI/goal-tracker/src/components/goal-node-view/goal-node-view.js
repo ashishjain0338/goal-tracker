@@ -19,7 +19,7 @@ function GoalNodeView(props) {
             "desc": "",
             "motivation": ""
         }, "Meta-Data": {
-            "status": "not-started",
+            "state": "not-started",
             "id": -1,
             "x": 121,
             "y": 121,

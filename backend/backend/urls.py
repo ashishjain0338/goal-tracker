@@ -26,7 +26,9 @@ urlpatterns = [
     path('retrieve/all/', views.retrieveAll),
     path('retrieve/single/<int:id>/', views.retrieveSingle),
     path('update/', csrf_exempt(views.update)),
-     path('delete/<int:id>/', views.delete),
+    path('delete/<int:id>/', views.delete),
+    path('edges/cud/', csrf_exempt(views.createUpdateDeleteEdges)),
+    path('edges/retrieve/', views.retrieveEdges)
 
 ]
 

@@ -1,0 +1,5 @@
+1. SubTask Crud
+2. Positioning Algo
+3. Edges Create and delete Form (only if required)
+4. Date to be updated when changed status
+5. Height-Width Signficance

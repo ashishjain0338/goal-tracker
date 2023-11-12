@@ -1,5 +1,5 @@
 from .models import GraphFlow, GoalNode
-
+import simplejson as json
 # decoder = ["not-started", "in-progress", "completed", "terminated"]
 
 
@@ -29,8 +29,13 @@ class CRUD:
 
     def create(self, userId):
         GoalNode.objects.create(GoalId=self.nodeCount)
-        GraphFlow.objects.filter(UserId=userId).update(
-            NodeCount=self.nodeCount + 1)
+
+        graphflow_obj = GraphFlow.objects.get(UserId=userId)
+        adj = json.loads(graphflow_obj.AdjList)
+        adj.append([])
+        graphflow_obj.NodeCount = self.nodeCount + 1
+        graphflow_obj.AdjList = json.dumps(adj)
+        graphflow_obj.save()
         self.nodeCount += 1
         return self.nodeCount - 1
 
@@ -51,7 +56,7 @@ class CRUD:
                 "data": {
                     "title": node.Title,
                     "description": node.Description,
-                    "goalState": node.State,
+                    "state": node.State,
                     "footer": node.getFooter()
                 }
             }
@@ -68,7 +73,7 @@ class CRUD:
                 "motivation": goalnode_obj.Motivation,
             },
             "Meta-Data": {
-                "status": "not-started",
+                "state": goalnode_obj.State,
                 "id": nodeId,
                 # To be set by current val (not saved val)
                 "x": goalnode_obj.X,
@@ -94,6 +99,7 @@ class CRUD:
         GoalNode.objects.filter(GoalId=nodeId).update(
             **diff)
         
+        
     def delete(self, userId, nodeId):
         GoalNode.objects.filter(GoalId=nodeId).update(GoalId=-1)# Represents Deletion
         for i in range(nodeId + 1, self.nodeCount):
@@ -102,4 +108,37 @@ class CRUD:
         GoalNode.objects.filter(GoalId=-1).delete()
         self.nodeCount -= 1
         GraphFlow.objects.filter(UserId=userId).update(NodeCount=self.nodeCount)
+
+    def createEdges(self, userId, edgesToCreate):
+        print("edges to create --> ", edgesToCreate)
+        graph_obj = GraphFlow.objects.get(UserId=userId)
+        adj = json.loads(graph_obj.AdjList)
+        for [src, dst] in edgesToCreate:
+            adj[int(src)].append(int(dst))
+        graph_obj.AdjList = json.dumps(adj)
+        graph_obj.save()
+    
+    def retrieveEdges(self, userId):
+        graph_obj = GraphFlow.objects.get(UserId=userId)
+        adj = json.loads(graph_obj.AdjList)
+        edges = []
+        for src in range(len(adj)):
+            for dst in adj[src]:
+                edge = {
+                    "id": "e{}-{}".format(src, dst),
+                    "source": str(src),
+                    "target": str(dst)
+                }
+                edges.append(edge)
+        return edges
+    
+    def deleteEdges(self, userId, edgesToDelete):
+        print("edges to delete --> ", edgesToDelete)
+        graph_obj = GraphFlow.objects.get(UserId=userId)
+        adj = json.loads(graph_obj.AdjList)
+        for [src, dst] in edgesToDelete:
+            print(src, dst)
+            adj[int(src)].remove(int(dst))
+        graph_obj.AdjList = json.dumps(adj)
+        graph_obj.save()
 

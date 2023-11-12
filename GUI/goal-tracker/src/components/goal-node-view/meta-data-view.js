@@ -17,11 +17,18 @@ const MetaDataView =  forwardRef((props, ref) => {
 
     
     useEffect(() => {
-        console.log("use-effect after click called for Meta-View  |", props.node);
+        console.log("use-effect after click called for Meta-View  |", props.goalData);
         setGoalState(props.goalData)
+        var state = props.goalData.state
+        var possibleStates = ["terminated", "not-started", "in-progress", "completed"]
+        document.getElementById(state).selected = true
+        console.debug("Clicked Node State ", state)
     }, [props.goalData]);
 
     function onFormChange(key, val){
+        if (key == "state"){
+            console.debug("State change Recognised | ", val)
+        }
         var curState = goalState
         curState[key] = val
         setGoalState({...curState}) // Clone and then saving
@@ -33,12 +40,13 @@ const MetaDataView =  forwardRef((props, ref) => {
             <Form>
                 <InputGroup className="mb-3">
                     <InputGroup.Text>Status: </InputGroup.Text>
-                    <Form.Select aria-label="Status" disabled={props.edited}>
+                    <Form.Select aria-label="Status" disabled={props.edited} onChange={(e) => {setReRenderEvent(e.target.value); onFormChange("state", e.target.value)}}>
                         {/* <option></option> */}
-                        <option value="1">In Progress</option>
-                        <option value="2">Not Started</option>
-                        <option value="3">Terminated</option>
-                        <option value="3">Completed</option>
+                        
+                        <option value="in-progress" id="in-progress" >In Progress</option>
+                        <option value="not-started" id="not-started">Not Started</option>
+                        <option value="terminated" id="terminated">Terminated</option>
+                        <option value="completed" id="completed">Completed</option>
                     </Form.Select>
                 </InputGroup>
 

@@ -33,7 +33,7 @@ function GoalNode(props) {
     const [description, setDescription] = useState(props.description);
     const [width, setWidth] = useState(props.width)
     const [level, setLevel] = useState(props.level)
-    const [goalState, setgoalState] = useState(props.data.goalState)
+    const [goalState, setgoalState] = useState(props.data.state)
 
     useEffect(() => {
         if (width == undefined){
