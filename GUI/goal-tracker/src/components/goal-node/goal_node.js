@@ -37,7 +37,7 @@ function GoalNode(props) {
 
     useEffect(() => {
         if (width == undefined){
-            console.log("Width Not provided, Setting to Default, 170")
+            console.info("Width Not provided, Setting to Default, 170")
             setWidth("230px")
         }
         if (goalState == undefined){
@@ -86,8 +86,7 @@ function GoalNode(props) {
                     </Card.Title>
                     <hr style={{ margin: "0px", padding: "0px" }} />
                     <Card.Text className='goal-description multiline-ellipsis'>
-                        Some quick example text to build on the card title and make up the
-                        bulk of the card's content.
+                        {props.data.description}
                     </Card.Text>
                     <hr style={{ margin: "0px", padding: "0px" }} />
 
@@ -118,7 +117,7 @@ function GoalNode(props) {
                 </Card.Body>
                 <hr style={{ margin: "0px", padding: "0px" }} />
                 <Card.Footer className='goal-footer testbg'>
-                    <p className='ellipsis goal-footer' style={{ margin: "0px" }}>Completed-On: 31/10</p>
+                    <p className='ellipsis goal-footer' style={{ margin: "0px" }}>{props.data.footer}</p>
                 </Card.Footer>
             </Card>
             <Handle type="source" position={Position.Bottom} />
