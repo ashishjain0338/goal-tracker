@@ -2,17 +2,19 @@ import './goal-node-view.css';
 import React, { useState, useEffect, useRef } from 'react';
 import { GoalDescription } from './goal-description';
 import { MetaDataView } from './meta-data-view';
-import { Pen, Trash, Save, Lock, Unlock, PlusLg, XLg } from 'react-bootstrap-icons';
+import { SubTaskView } from './sub-task-view/sub-task-view';
+import { Pen, Trash, Save, Lock, Unlock, PlusLg, XLg, BuildingAdd } from 'react-bootstrap-icons';
 import axios from 'axios';
 import structuredClone from '@ungap/structured-clone';
 // import Floppy from 'react-bootstrap-icons';
 
 function GoalNodeView(props) {
     const [showDescription, setShowDescription] = useState(false);
-    const [showSubTask, setShowSubTask] = useState(false);
-    const [showMetaData, setShowMetaData] = useState(true);
+    const [showSubTask, setShowSubTask] = useState(true);
+    const [showMetaData, setShowMetaData] = useState(false);
     const [rootAccess, setRootAccess] = useState(false);
     const [editState, setEditState] = useState(false);
+
     var defaultNode = {
         "title": "",
         "Description": {
@@ -29,6 +31,10 @@ function GoalNodeView(props) {
             "startedAt": "1900-01-01",
             "targetStart": "1900-01-01",
             "completedAt": "1900-01-01",
+        },
+        "Subtask": {
+            "order": [],
+            "data": {}
         }
 
     }
@@ -36,7 +42,8 @@ function GoalNodeView(props) {
     const [serverSentNode, setServerSentNode] = useState("")
     const [descripitonUpdate, setDescriptionUpdate] = useState("")
     const [metaDataUpdate, setMetaDataUpdate] = useState("")
-    const childDescriptionRef = useRef(), childMetaDataRef = useRef()
+    const [subTaskUpdate, setSubTaskUpdate] = useState("")
+    const childDescriptionRef = useRef(), childMetaDataRef = useRef(), subTaskRef = useRef()
 
     useEffect(() => {
         console.debug("use-effect after click called  |Clicked Node | ", props.node);
@@ -55,8 +62,8 @@ function GoalNodeView(props) {
                 data['Meta-Data']['width'] = props.node.width;
                 console.debug("Clicked Node-Data to Send ", data)
                 setClickedNode(data)
-                setDescriptionUpdate({...data["Description"]})
-                setMetaDataUpdate({...data["Meta-Data"]})
+                setDescriptionUpdate({ ...data["Description"] })
+                setMetaDataUpdate({ ...data["Meta-Data"] })
 
             });
 
@@ -73,16 +80,19 @@ function GoalNodeView(props) {
 
     // When a tab is closing Call, Call for edited-values
     function retrieveEditedFields(newTabIndex) {
+        // console.debug("Retieve Edited Feilds with ", showDescription, showSubTask, showMetaData)
         if (newTabIndex != 0 && showDescription) {
             var editDes = childDescriptionRef.current.retrieveEditState()
             setDescriptionUpdate(editDes);
-            return {"key": "Description", "val" : editDes}
+            return { "key": "Description", "val": editDes }
         } else if (newTabIndex != 1 && showSubTask) {
-
+            var subTaskDiff = subTaskRef.current.retrieveEditState()
+            setSubTaskUpdate(subTaskDiff)
+            return { "key": "SubTask", "val": subTaskDiff }
         } else if (newTabIndex != 2 && showMetaData) {
             var editMeta = childMetaDataRef.current.retrieveEditState()
             setMetaDataUpdate(editMeta)
-            return {"key": "Meta-Data", "val" : editMeta}
+            return { "key": "Meta-Data", "val": editMeta }
         }
     }
 
@@ -107,22 +117,13 @@ function GoalNodeView(props) {
 
     }
 
-    function handleRootAccessButton() {
-        setRootAccess(!rootAccess)
-        handleEdit()
-    }
-
-    function handleEdit() {
-        setEditState(true);
-    }
-    function cancelEdit() {
-        setEditState(false);
-    }
-
     function compareEditAndCurrentState(curState, editState) {
         var out = []
         for (var key in curState) {
             // console.debug(key, curState[key], editState,curState[key] instanceof Object)
+            if (key == "SubTask") {
+                continue // SubTask Will be Handled Separatly
+            }
             if (curState[key] instanceof Object) {
                 if (editState[key] != undefined) {
                     var backtrack_val = compareEditAndCurrentState(curState[key], editState[key])
@@ -137,25 +138,81 @@ function GoalNodeView(props) {
         return out
     }
 
+    /*
+        Diff will be a dictionary of 
+        {
+        diffOptions: { "order": false, "updation": false, "deletion": false },
+        order: order,
+        subtaskData: subtaskData
+        updatedTaskId: updatedTasks
+        deletedTaskId: deletionTasks
+      }
+    */
+    function getSubTaskDiff(diff) {
+        console.debug("Subtask Diff ", diff)
+        var order = undefined, udSubTask = {}
+        if (diff.diffOptions["order"] || diff.diffOptions["updation"] || diff.diffOptions["deletion"]) {
+            order = diff.order
+            var newOrder = order.map((taskId, index) => {
+                return [taskId, diff.subtaskData[taskId].title, diff.subtaskData[taskId].state]
+            })
+            order = JSON.stringify(newOrder)
+            console.debug("Json order diff ", order)
+        }
+
+
+        if (diff.diffOptions["updation"]) {
+            var updatedTasks = diff.updatedTaskId.map((taskId, index) => {
+                var out = {}
+                out["taskId"] = taskId
+                out["datadict"] = diff.subtaskData[taskId]
+                return out
+            })
+            udSubTask["update"] = updatedTasks
+        }
+
+        if (diff.diffOptions["deletion"]){
+            udSubTask["delete"] = diff.deletedTaskId
+        }
+
+        if (Object.keys(udSubTask).length == 0) {
+            udSubTask = undefined
+        }
+        return [order, udSubTask]
+
+    }
+
     function handleSave() {
         setEditState(false);
         let choice = window.confirm("Do you want to save the current changes?");
 
         if (choice) {
             // Getting Edited-data
-            console.debug("Before Edit-Data: ", serverSentNode);
+            console.debug("Before Edit-Data: ServerSentData: ", serverSentNode);
+
             var editedData = retrieveEditedFields(-1);
             var title = document.getElementById("goalTitle").innerHTML
             var editedNode = {
                 "title": title,
                 "Description": descripitonUpdate,
                 "Meta-Data": metaDataUpdate,
+                "SubTask": subTaskUpdate
             }
-            editedNode[editedData["key"]] = editedData["val"]// To set that EditValue's Retrieved, when saveBtn is clicked (Since no tab is closed)
-            // childDescriptionRef.current.alertMe()
-            console.debug("After Edit-Data ", editedNode)
+            console.debug(editedData)
+            if (editedData["key"] != undefined) {
+                editedNode[editedData["key"]] = editedData["val"]// To set that EditValue's Retrieved, when saveBtn is clicked (Since no tab is closed)
+            }
+
+            console.debug("After Edit-Data: EditedData: ", editedNode)
             var diff = compareEditAndCurrentState(serverSentNode, editedNode)
-            console.info("Diff ", diff)
+            // Getting SubTask Diff
+            var [order, udSubTaskModel] = getSubTaskDiff(editedNode["SubTask"])
+            console.debug("New Order ", order)
+            if (order != undefined) {
+                diff.push(["Subtask", order])
+            }
+            console.debug("Diff ", diff)
+
             axios({
                 url: "http://localhost:8000/update/",
                 method: "POST",
@@ -166,11 +223,28 @@ function GoalNodeView(props) {
             }).then((res) => {
                 if (res['data']['pass']) {
                     // alert('New Node Created with Id ' + res['data']['nodeId'] + '\nSelect the Node to Edit');
-                    window.location.href = "/";
+                    // window.location.href = "/";
                 }
                 else
                     alert('Something Terrible Happened, Error --> ' + res['data']['message']);
             });
+
+            if (udSubTaskModel != undefined) {
+                axios({
+                    url: "http://localhost:8000/subtask/ud/",
+                    method: "POST",
+                    data: udSubTaskModel
+                }).then((res) => {
+                    if (res['data']['pass']) {
+                        // alert('New Node Created with Id ' + res['data']['nodeId'] + '\nSelect the Node to Edit');
+                        // window.location.href = "/";
+                    }
+                    else
+                        alert('Something Terrible Happened, Error --> ' + res['data']['message']);
+                });
+            }
+            console.debug("Axios end")
+            window.location.href = "/";
 
         } else {
             alert("Your action has been terminated!!");
@@ -202,7 +276,7 @@ function GoalNodeView(props) {
 
     function deleteNode() {
         var nodeId = serverSentNode["Meta-Data"]["id"]
-        let choice = window.confirm("Do you want to delete node with id: " +  nodeId);
+        let choice = window.confirm("Do you want to delete node with id: " + nodeId);
 
         if (choice) {
             axios({
@@ -222,6 +296,27 @@ function GoalNodeView(props) {
         }
     }
 
+    function AddNewSubtask() {
+        let choice = window.confirm("This action would create New-SubTask\nDo You want to continue?");
+
+        if (choice) {
+
+            axios({
+                url: "http://localhost:8000/subtask/create/" + serverSentNode["Meta-Data"]["id"],
+                method: "GET",
+            }).then((res) => {
+                if (res['data']['pass']) {
+                    alert('New Task Created with Id ' + res['data']['taskId'] + '\nSelect the Task to Edit');
+                    window.location.href = "/";
+                }
+                else
+                    alert('Something Terrible Happened, Error --> ' + res['data']['message']);
+            });
+
+        } else {
+            alert("Your action has been terminated!!");
+        }
+    }
 
     // { console.log("NodeView-Called", props.node) }
     return (
@@ -232,12 +327,19 @@ function GoalNodeView(props) {
                 {
                     editState ?
                         <button className='btn btn-light ' onClick={handleSave} data-toggle="tooltip" title="Save"><Save /></button> :
-                        <button className='btn btn-light ' onClick={handleEdit} data-toggle="tooltip" title="Edit"><Pen /></button>
+                        <button className='btn btn-light ' onClick={() => setEditState(true)} data-toggle="tooltip" title="Edit"><Pen /></button>
                 }
-                <button className='btn btn-light' onClick={handleRootAccessButton} data-toggle="tooltip" title={"Root Ascess " + getDisabledStatus(rootAccess)}>{rootAccess ? <Unlock /> : <Lock />}</button>
+                {
+                    editState &&
+                    <button className='btn btn-light' onClick={() => setRootAccess(!rootAccess)} data-toggle="tooltip" title={"Root Ascess " + getDisabledStatus(rootAccess)}>{rootAccess ? <Unlock /> : <Lock />}</button>
+                }
+                {
+                    !editState && showSubTask &&
+                    <button className='btn btn-light' onClick={AddNewSubtask} data-toggle="tooltip" title="SubTask Add"><BuildingAdd /></button>
+                }
                 {
                     editState ?
-                        <button className='btn btn-light' data-toggle="tooltip" title="Cancel" onClick={cancelEdit}><XLg /></button> :
+                        <button className='btn btn-light' data-toggle="tooltip" title="Cancel" onClick={() => setEditState(false)}><XLg /></button> :
                         <button className='btn btn-light' data-toggle="tooltip" title="Delete" onClick={deleteNode}><Trash /></button>
                 }
 
@@ -259,12 +361,13 @@ function GoalNodeView(props) {
                     <button className='btn btn-light' onClick={() => showComponent(1)}>Sub-Task</button>
                 </div>
                 <div className='col-lg-4 col-sm-12'>
-                    <button className='btn btn-light' onClick={() => showComponent(2)}>Meta-Data</button>
+                    <button className='btn btn-light' onClick={() => showComponent(2)}>Meta</button>
                 </div>
             </div>
             <hr></hr>
             {showDescription && <GoalDescription ref={childDescriptionRef} edited={editState} goalData={clickedNode["Description"]} />}
             {showMetaData && <MetaDataView ref={childMetaDataRef} edited={getDisabledStatus(editState)} root={getDisabledStatus(rootAccess)} goalData={clickedNode["Meta-Data"]} />}
+            {showSubTask && <SubTaskView ref={subTaskRef} subtasks={clickedNode["Subtask"]} />}
         </div>
     )
 }

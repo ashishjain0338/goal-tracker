@@ -28,7 +28,9 @@ urlpatterns = [
     path('update/', csrf_exempt(views.update)),
     path('delete/<int:id>/', views.delete),
     path('edges/cud/', csrf_exempt(views.createUpdateDeleteEdges)),
-    path('edges/retrieve/', views.retrieveEdges)
+    path('edges/retrieve/', views.retrieveEdges),
+    path('subtask/create/<int:nodeId>/', views.createSubTask),
+    path('subtask/ud/', views.updateDeleteSubTask),
 
 ]
 

@@ -1,0 +1,29 @@
+.subtask-status {
+    text-align: right;
+    font-size: 0.75rem;
+    color: rgb(67, 65, 65);
+}
+
+.subtask-ellipsis{
+    text-overflow: ellipsis;
+    /* enables ellipsis */
+    white-space: nowrap;
+    /* keeps the text in a single line */
+    overflow: hidden;
+    /* keeps the element from overflowing its parent */
+}
+
+.subtask-multiline-ellipsis{
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    /* start showing ellipsis when 3rd line is reached */
+    white-space: pre-wrap;
+    /* let the text wrap preserving spaces */
+}
+
+.subtask-summary-div:hover{
+    cursor:pointer;
+}
+

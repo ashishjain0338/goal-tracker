@@ -1,4 +1,4 @@
-from .models import GraphFlow, GoalNode
+from .models import GraphFlow, GoalNode, SubTask
 import simplejson as json
 # decoder = ["not-started", "in-progress", "completed", "terminated"]
 
@@ -57,7 +57,8 @@ class CRUD:
                     "title": node.Title,
                     "description": node.Description,
                     "state": node.State,
-                    "footer": node.getFooter()
+                    "footer": node.getFooter(),
+                    "subtask": json.loads(node.Subtask)
                 }
             }
             out["nodes"].append(curNodeFormatted)
@@ -66,6 +67,21 @@ class CRUD:
 
     def retrieveSingle(self, userId, nodeId):
         goalnode_obj = GoalNode.objects.get(GoalId=nodeId)
+        subtask_list = json.loads(goalnode_obj.Subtask)
+        subtask_data = {}
+        for task in subtask_list:
+            taskId = task[0]
+            subtask_obj = SubTask.objects.get(TaskId = taskId)
+            data = {
+                "title": subtask_obj.Title,
+                "description": subtask_obj.Description,
+                "motivation": subtask_obj.Motivation,
+                "state": subtask_obj.State,
+                "createdAt": subtask_obj.CreatedAt,
+                "editedAt": subtask_obj.EditedAt
+            }
+            subtask_data[taskId] = data
+
         out = {
             "title": goalnode_obj.Title,
             "Description": {
@@ -87,6 +103,10 @@ class CRUD:
                 "startedAt":  goalnode_obj.StartedAt.strftime("%Y-%m-%d"),
                 "targetStart":  goalnode_obj.ToStartAt.strftime("%Y-%m-%d"),
                 "completedAt":  goalnode_obj.CompletedAt.strftime("%Y-%m-%d"),
+            },
+            "Subtask": {
+                "order": [subtask[0] for subtask in subtask_list],
+                "data": subtask_data
             }
         }
         print(goalnode_obj)
@@ -142,3 +162,40 @@ class CRUD:
         graph_obj.AdjList = json.dumps(adj)
         graph_obj.save()
 
+class SubTaskCRUD:
+    def __init__(self) -> None:
+        pass
+
+    def create(self, nodeId):
+        created_obj = SubTask.objects.create()
+        print("Task Created with Id ", created_obj.TaskId)
+        goal_obj = GoalNode.objects.get(GoalId=nodeId)
+        subtaskList = json.loads(goal_obj.Subtask)
+        subtaskList.append([created_obj.TaskId, created_obj.Title, created_obj.State])
+        goal_obj.Subtask = json.dumps(subtaskList)
+        goal_obj.save()
+        return created_obj.TaskId
+    
+    # Action List Represents [
+    #   {
+    #       "taskId" : ,
+    #       "datadict": { "title":, "description":, "motivation":, "state"}:
+    #   }
+    # ]
+    def update(self, actionList):
+        for action in actionList:
+            taskId = action["taskId"]
+            datadict = action["datadict"]
+            data = {}
+            for key,val in datadict.items():
+                key = key[0].upper() + key[1:]
+                data[key] = val
+
+            print(data)
+            # print(data)
+            SubTask.objects.filter(TaskId = taskId).update(**data) 
+
+    def delete(self, deletionIds):
+        print(deletionIds)
+        for id in deletionIds:
+            SubTask.objects.get(TaskId=id).delete()

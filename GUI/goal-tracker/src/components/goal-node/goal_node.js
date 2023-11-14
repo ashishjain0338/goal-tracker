@@ -1,5 +1,4 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import './goal_node.css'
 import { Handle, Position } from 'reactflow';
@@ -9,21 +8,21 @@ import { Handle, Position } from 'reactflow';
  * @param {*} goalStatus : String (in-progress)
  * @returns : String (In Progress)
  */
-function getStateString(goalStatus){
+function getStateString(goalStatus) {
     var out = "";
     var nextCharToUpper = true;
-    for (var i = 0; i < goalStatus.length; i++){
-        if (nextCharToUpper){
+    for (var i = 0; i < goalStatus.length; i++) {
+        if (nextCharToUpper) {
             out += goalStatus[i].toUpperCase();
             nextCharToUpper = false;
-        }else if(goalStatus[i] == "-"){
+        } else if (goalStatus[i] == "-") {
             out += " ";
             nextCharToUpper = true;
         }
-        else{
+        else {
             out += goalStatus[i];
         }
-        
+
     }
     return out;
 }
@@ -34,41 +33,33 @@ function GoalNode(props) {
     const [width, setWidth] = useState(props.width)
     const [level, setLevel] = useState(props.level)
     const [goalState, setgoalState] = useState(props.data.state)
+    const [combSubtask, setCombinedSubtask] = useState(props.data.subtask)
 
     useEffect(() => {
-        if (width == undefined){
+        if (width == undefined) {
             console.info("Width Not provided, Setting to Default, 170")
             setWidth("230px")
         }
-        if (goalState == undefined){
+        if (goalState == undefined) {
             setgoalState("not-started");
         }
+        // Combining elements of sub-tasks two times at once
+        var temp = []
+        for (var i = 0; i < props.data.subtask.length; i += 2) {
+            var firstele = props.data.subtask[i]
+            var secondele = undefined
+            if (i + 1 < props.data.subtask.length) {
+                secondele = props.data.subtask[i + 1]
+            }
+            temp.push([firstele, secondele])
+        }
+        setCombinedSubtask(temp)
+
 
     }, [props, width]);
 
-    // console.log("Node object: ",  props.data)
-    // function getSubtask() {
-    //     var return_rows = []
-    //     for (var row = 0; row < 2; row++) {
-    //         var columns = [];
-    //         for (var col = 0; col < 2; col++) {
-    //             columns += [
-    //                 <div className='col-6' >
-    //                     <p className='ellipsis subtask'><span className="dot"></span>Subtask-1 abcderfg</p>
-    //                 </div >]
-    //         }
-
-    //         return_rows += [
-    //             <div className='row'>
-    //                 columns
-    //             </div>
-    //         ]
-    //     }
-    //     return return_rows;
-    // }
-
     return (
-        <div style={{ width:`${width}`}} className='testbg'>
+        <div style={{ width: `${width}` }} className='testbg'>
             <Handle type="target" position={Position.Top} />
             <Card  >
                 <Card.Body className={`bg-${goalState}`}>
@@ -89,8 +80,37 @@ function GoalNode(props) {
                         {props.data.description}
                     </Card.Text>
                     <hr style={{ margin: "0px", padding: "0px" }} />
+                    {
+                        // Item represents the array of  [[TAskId, Title, State] of first ele, [TAskId, Title, State] of second ele]
+                        combSubtask.map((item, index) => {
+                            if (item[1] == undefined) {
+                                return (
+                                    <div>
+                                        <div className='row'>
+                                            <div className='col-6'>
+                                                <p className='ellipsis subtask'><span className={`dot bg-${item[0][2]}-dot`}></span>{item[0][1]}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            }else{
+                                return (
+                                    <div>
+                                        <div className='row'>
+                                            <div className='col-6'>
+                                                <p className='ellipsis subtask'><span  className={`dot bg-${item[0][2]}-dot`} ></span>{item[0][1]}</p>
+                                            </div>
+                                            <div className='col-6'>
+                                                <p className='ellipsis subtask'><span  className={`dot bg-${item[1][2]}-dot`} ></span>{item[1][1]}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            }
 
-                    <div className='row'>
+                        })
+                    }
+                    {/* <div className='row'>
                         <div className='col-6'>
                             <p className='ellipsis subtask'><span className="dot bg-in-progress-dot" ></span>Subtask-1 abcderfg</p>
                         </div>
@@ -113,7 +133,7 @@ function GoalNode(props) {
                         <div className='col-6'>
                             <p className='ellipsis subtask'><span className="dot  bg-in-progress-dot"></span>Subtask-1 abcderfg</p>
                         </div>
-                    </div>
+                    </div> */}
                 </Card.Body>
                 <hr style={{ margin: "0px", padding: "0px" }} />
                 <Card.Footer className='goal-footer testbg'>

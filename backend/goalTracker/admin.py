@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import GoalNode, GraphFlow
+from .models import GoalNode, GraphFlow, SubTask
 # Register your models here.
 
 # Register your models here.
@@ -10,3 +10,4 @@ from .models import GoalNode, GraphFlow
 
 admin.site.register(GoalNode)
 admin.site.register(GraphFlow)
+admin.site.register(SubTask)

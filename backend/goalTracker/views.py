@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import GoalNode
-from .crud import CRUD
+from .crud import CRUD, SubTaskCRUD
 from rest_framework.decorators import api_view
 
 USER_ID = 1
@@ -93,3 +93,21 @@ def retrieveEdges(request):
     crud_obj = CRUD(USER_ID)
     # out = crud_obj.retrieveEdges(USER_ID)
     # return JsonResponse({"edges": out})
+
+def createSubTask(request, nodeId):
+    subtaskCrud_obj = SubTaskCRUD()
+    createdId = subtaskCrud_obj.create(nodeId)
+    return JsonResponse({"pass": True, "taskId": createdId})
+
+@api_view(["POST"])
+def updateDeleteSubTask(request):
+    if request.method == 'POST':
+        print("Update-delete Got Data ", request.data)
+        subtaskCrud_obj = SubTaskCRUD()
+        operations = request.data
+        for operation in operations:
+            if operation == "update":
+                subtaskCrud_obj.update(request.data[operation])
+            elif operation == "delete":
+                subtaskCrud_obj.delete(request.data[operation])
+    return JsonResponse({"pass": True})

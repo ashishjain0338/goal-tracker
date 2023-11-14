@@ -7,7 +7,7 @@ class GoalNode(models.Model):
     Title = models.CharField(max_length=500, default="Goal-X")
     Description = models.CharField(max_length=1000, default="Your Goal Description")
     Motivation = models.CharField(max_length=5000, default="Your Goal Motivation")
-    Subtask = models.CharField(max_length=1000, default="[]")
+    Subtask = models.CharField(max_length=1000, default=json.dumps([]))
     State = models.CharField(default="not-started", max_length=30)# 
     # Possible Option for state : terminated, not-started, in-progress, completed 
     GoalId = models.IntegerField()
@@ -38,3 +38,16 @@ class GraphFlow(models.Model):
     UserId = models.IntegerField()
     AdjList = models.CharField(max_length=5000, default= json.dumps([]))
     NodeCount = models.IntegerField(default=0)
+
+class SubTask(models.Model):
+    TaskId = models.AutoField(primary_key=True)
+    Title = models.CharField(max_length=500, default="Task-X")
+    Description = models.CharField(max_length=1000, default="Your Sub-Task Description")
+    Motivation = models.CharField(max_length=5000, default="Your Sub-Task Motivation")
+    State = models.CharField(default="not-started", max_length=30)# 
+    # Possible Option for state : terminated, not-started, in-progress, completed 
+    CreatedAt = models.DateField(auto_now_add=True,auto_now=False)
+    EditedAt = models.DateField(auto_now=True)
+
+    
+
