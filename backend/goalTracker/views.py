@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import GoalNode
+from .models import GoalNode, GraphFlow, SubTask
 from .crud import CRUD, SubTaskCRUD
 from rest_framework.decorators import api_view
+from django.core import serializers
+import simplejson as json
 
 USER_ID = 1
 # Create your views here.
@@ -63,7 +65,7 @@ def createUpdateDeleteEdges(request):
             print("Request Post ", request.data)
             crud_obj = CRUD(USER_ID)
             updateEdgePresent = False
-            # Since Update-Edges would automatically trigger a delete-edge event but not create edge, 
+            # Since Update-Edges would automatically trigger a delete-edge event but not create edge,
             # So, storing "new edges" that get formed with update-edge event
             updatedYetToCreateEdge = []
             for operation in request.data:
@@ -78,7 +80,8 @@ def createUpdateDeleteEdges(request):
                         crud_obj.update(USER_ID, int(id), newPosition)
                 elif operation == "update-edge":
                     for event in request.data[operation]:
-                        updatedYetToCreateEdge.append([event["new"]["src"], event["new"]["dst"]])
+                        updatedYetToCreateEdge.append(
+                            [event["new"]["src"], event["new"]["dst"]])
 
             crud_obj.createEdges(USER_ID, updatedYetToCreateEdge)
             return JsonResponse({"pass": True})
@@ -94,10 +97,12 @@ def retrieveEdges(request):
     # out = crud_obj.retrieveEdges(USER_ID)
     # return JsonResponse({"edges": out})
 
+
 def createSubTask(request, nodeId):
     subtaskCrud_obj = SubTaskCRUD()
     createdId = subtaskCrud_obj.create(nodeId)
     return JsonResponse({"pass": True, "taskId": createdId})
+
 
 @api_view(["POST"])
 def updateDeleteSubTask(request):
@@ -110,4 +115,17 @@ def updateDeleteSubTask(request):
                 subtaskCrud_obj.update(request.data[operation])
             elif operation == "delete":
                 subtaskCrud_obj.delete(request.data[operation])
+    return JsonResponse({"pass": True})
+
+
+def takeBackup(request):
+    print("Got Backup Request")
+    outfolder = "backup/"
+    backupPoints = [(GoalNode.objects.all(), "goalNode.json"), (GraphFlow.objects.all(), "graphFlow.json"), 
+                    (SubTask.objects.all(), "subtask.json")]
+    for (objects, filename) in backupPoints:
+        json_str = serializers.serialize("json", objects)
+        with open(outfolder + filename, "w") as fp:
+            # For pretty-print we re converting string back to json and then to string, and then writing
+            json.dump(json.loads(json_str), fp, indent=4)
     return JsonResponse({"pass": True})

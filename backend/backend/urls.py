@@ -31,6 +31,7 @@ urlpatterns = [
     path('edges/retrieve/', views.retrieveEdges),
     path('subtask/create/<int:nodeId>/', views.createSubTask),
     path('subtask/ud/', views.updateDeleteSubTask),
+    path('take-backup/', views.takeBackup),
 
 ]
 

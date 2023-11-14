@@ -170,13 +170,25 @@ function GraphView(props) {
         // setEdges(flow.edges || []);
     }
 
-    {console.debug("re-rendering grpah-flow")}
+    function takeBackup(){
+        axios({
+            url: "http://localhost:8000/take-backup/",
+            method: "GET",
+        }).then((res) => {
+            var data = res['data'];
+            console.debug("Taking Backup ", data)
+            if (data["pass"]){
+                alert("Backup has been created")
+            }
+        });
+    }
     return (
         <div style={{ width: '100%', height: '100%' }}>
             {/* <button onClick={onSave}>Save</button>
             <button onClick={TestPositioningAlgo}>Position</button> */}
             <button className="btn btn-light" onClick={saveEdgesAndPosition}>Save State</button>
             <button className="btn btn-light" onClick={PositioningUsingBFS}>Automatic Position</button>
+            <button className="btn btn-light" onClick={takeBackup}>Take Backup</button>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

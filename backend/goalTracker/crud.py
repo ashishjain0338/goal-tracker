@@ -121,13 +121,39 @@ class CRUD:
         
         
     def delete(self, userId, nodeId):
+        # Step-1: Decrement the nodeId greater than to be deleted
         GoalNode.objects.filter(GoalId=nodeId).update(GoalId=-1)# Represents Deletion
         for i in range(nodeId + 1, self.nodeCount):
             print("Decrementing NodeId of ", i)
             GoalNode.objects.filter(GoalId=i).update(GoalId = i - 1)
         GoalNode.objects.filter(GoalId=-1).delete()
         self.nodeCount -= 1
-        GraphFlow.objects.filter(UserId=userId).update(NodeCount=self.nodeCount)
+
+        # Step-2: Update the children as well as adjancy list
+        graphflow_obj = GraphFlow.objects.filter(UserId=userId)[0]
+        graphflow_obj.NodeCount = self.nodeCount
+        adj = json.loads(graphflow_obj.AdjList)
+        orphanChildren = [child - 1 if child > nodeId else child for child in adj[nodeId]]
+
+        updatedAdj = []
+        for parent in range(len(adj)):
+            if parent == nodeId: # Drops the deletion Node
+                continue
+            updatedChildren = [] 
+            for child in adj[parent]:
+                if child > nodeId:
+                    updatedChildren.append(child - 1)# Decrementing the Id (if greater)
+                elif child == nodeId:
+                    updatedChildren = updatedChildren + orphanChildren
+                else:
+                    updatedChildren.append(child)
+            updatedAdj.append(updatedChildren)
+        
+        graphflow_obj.AdjList = json.dumps(updatedAdj)
+        print("Adj Got ", adj)
+        print("Updated Adj ", updatedAdj)
+        graphflow_obj.save()
+
 
     def createEdges(self, userId, edgesToCreate):
         print("edges to create --> ", edgesToCreate)

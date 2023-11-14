@@ -149,6 +149,10 @@ function GoalNodeView(props) {
       }
     */
     function getSubTaskDiff(diff) {
+        if (diff == ""){// Default Value
+            return [undefined, undefined]
+
+        }
         console.debug("Subtask Diff ", diff)
         var order = undefined, udSubTask = {}
         if (diff.diffOptions["order"] || diff.diffOptions["updation"] || diff.diffOptions["deletion"]) {
