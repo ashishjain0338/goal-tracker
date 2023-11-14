@@ -124,6 +124,25 @@ const SubTaskView = forwardRef((props, ref) => {
 )
 
 function SubTaskSummary(props) {
+  function getStateString(goalStatus) {
+    var out = "";
+    var nextCharToUpper = true;
+    for (var i = 0; i < goalStatus.length; i++) {
+        if (nextCharToUpper) {
+            out += goalStatus[i].toUpperCase();
+            nextCharToUpper = false;
+        } else if (goalStatus[i] == "-") {
+            out += " ";
+            nextCharToUpper = true;
+        }
+        else {
+            out += goalStatus[i];
+        }
+
+    }
+    return out;
+}
+
   // { console.debug(props) }
   return (
 
@@ -137,7 +156,7 @@ function SubTaskSummary(props) {
               </div>
               <div className='col-lg-3 col-md-6' align="right">
 
-                <p className='subtask-status subtask-ellipsis'>{props.data.state}</p>
+                <p className='subtask-status subtask-ellipsis'>{getStateString(props.data.state)}</p>
                 <button className="btn btn-light" style={{ padding: "0px", zIndex: "1" }} onClick={(event) => props.moveUpfxn(event)}><ArrowUp /></button>
                 <button className="btn btn-light" style={{ padding: "0px" }} onClick={(event) => props.moveDownfxn(event)}><ArrowDown /></button>
               </div>

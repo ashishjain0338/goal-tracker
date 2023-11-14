@@ -14,8 +14,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
-
-
+import { sameLvlPositioning } from "./positioning";
+// import 
 
 const nodeTypes = { goalNode: GoalNode };
 function GraphView(props) {
@@ -23,6 +23,7 @@ function GraphView(props) {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [diff, setDiff] = useState({})
     const [serverSentState, setServerSentState] = useState({})
+    const [reRender, setReRender] = useState(false)
     const onClick = useCallback((event, node) => { props.clickedNodeCallback(node) })
     // const onConnect = useCallback((params) => setEdges((eds) => {console.debug("From adding Edge"); addEdge(params, eds)}), [setEdges]);
     const edgeUpdateSuccessful = useRef(true);
@@ -51,11 +52,11 @@ function GraphView(props) {
         console.debug("Editing : ", oldEdge, newConnection)
         var temp = diff
         var data = {
-            "old":{
+            "old": {
                 "src": oldEdge.source,
                 "dst": oldEdge.target,
             },
-            "new":{
+            "new": {
                 "src": newConnection.source,
                 "dst": newConnection.target,
             }
@@ -67,7 +68,7 @@ function GraphView(props) {
         }
         // setDiff([...diff, ["create-edge", params.source, params.target]]);
         setDiff(temp)
-      }, []);
+    }, []);
 
 
     function onConnectSave(params) {
@@ -89,7 +90,7 @@ function GraphView(props) {
             method: "GET",
         }).then((res) => {
             var data = res['data'];
-            console.debug("Server-response (retrieve/all/)", res)   
+            console.debug("Server-response (retrieve/all/)", res)
             if (data['nodes']) {
                 setServerSentState(res['data']['nodes'])
                 setNodes(res['data']['nodes'])
@@ -103,31 +104,32 @@ function GraphView(props) {
 
     }, []);
 
-    function getPositionDiff(intialState, editedState){
+    function getPositionDiff(intialState, editedState) {
         var positionDiff = {}
-        for (var i = 0; i < intialState.length; i++){
+        for (var i = 0; i < intialState.length; i++) {
             var serverId = intialState[i].id, editedId = editedState[i].id;
-            if (serverId != editedId){
+            if (serverId != editedId) {
                 alert("Server Send Id " + serverId + " and edited Id " + editedId + "are not same| Skipping")
                 continue
-            }else{
+            } else {
                 var diff = []
-                if (intialState[i].position.x != editedState[i].position.x){
+                if (intialState[i].position.x != editedState[i].position.x) {
                     diff.push(["X", editedState[i].position.x])
                 }
-                if (intialState[i].position.y != editedState[i].position.y){
+                if (intialState[i].position.y != editedState[i].position.y) {
                     diff.push(["Y", editedState[i].position.y])
                 }
                 // console.debug(Object.keys(diff).length)
-                if (diff.length != 0){
+                if (diff.length != 0) {
                     positionDiff[serverId] = diff
                 }
-                
+
             }
         }
         console.debug("Returning Position-Diff ", positionDiff)
         return positionDiff
     }
+
     function saveEdgesAndPosition() {
         console.debug("Before Saving| Server Sent nodes ", serverSentState)
         console.debug("Before Saving| Edited State ", nodes)
@@ -149,12 +151,32 @@ function GraphView(props) {
 
     }
 
+    function PositioningUsingBFS() {
+        console.debug("Positioning using BFS")
+        var dimensions = {
+            "width": 250,
+            "height": 250,
+            "margin-w": 30,
+            "margin-h": 60,
+        }
 
+        var graphData = {
+            nodes: nodes,
+            edges: edges,
+        }
+
+        var flow = sameLvlPositioning(graphData, dimensions, [0])// This will make changes on the same-reference
+        setNodes(structuredClone(flow.nodes) || []);
+        // setEdges(flow.edges || []);
+    }
+
+    {console.debug("re-rendering grpah-flow")}
     return (
         <div style={{ width: '100%', height: '100%' }}>
             {/* <button onClick={onSave}>Save</button>
             <button onClick={TestPositioningAlgo}>Position</button> */}
             <button className="btn btn-light" onClick={saveEdgesAndPosition}>Save State</button>
+            <button className="btn btn-light" onClick={PositioningUsingBFS}>Automatic Position</button>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

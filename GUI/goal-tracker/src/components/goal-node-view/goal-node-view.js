@@ -78,7 +78,7 @@ function GoalNodeView(props) {
         }
     }
 
-    // When a tab is closing Call, Call for edited-values
+    // When a tab is closing, Call for edited-values
     function retrieveEditedFields(newTabIndex) {
         // console.debug("Retieve Edited Feilds with ", showDescription, showSubTask, showMetaData)
         if (newTabIndex != 0 && showDescription) {
