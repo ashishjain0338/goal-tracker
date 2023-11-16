@@ -10,7 +10,7 @@ const MetaDataView =  forwardRef((props, ref) => {
     
     useImperativeHandle(ref, () => ({
         retrieveEditState(){
-            alert("From Metadata, retrieving edit-state");
+            // ("From Metadata, retrieving edit-state");
             return goalState;
         }
     }))

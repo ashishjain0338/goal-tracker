@@ -4,7 +4,7 @@ import { forwardRef, useImperativeHandle } from 'react';
 const GoalDescription = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
         retrieveEditState(){
-            alert("From Description, retrieving edit-state");
+            console.debug("From Description, retrieving edit-state");
             var out = {
                 "description": document.getElementById("description").innerHTML,
                 "motivation": document.getElementById("motivation").innerHTML

@@ -9,8 +9,8 @@ import structuredClone from '@ungap/structured-clone';
 // import Floppy from 'react-bootstrap-icons';
 
 function GoalNodeView(props) {
-    const [showDescription, setShowDescription] = useState(false);
-    const [showSubTask, setShowSubTask] = useState(true);
+    const [showDescription, setShowDescription] = useState(true);
+    const [showSubTask, setShowSubTask] = useState(false);
     const [showMetaData, setShowMetaData] = useState(false);
     const [rootAccess, setRootAccess] = useState(false);
     const [editState, setEditState] = useState(false);
